@@ -34,7 +34,7 @@ Before writing any code:
   - Tech stack (framework, database, auth, hosting)
   - Pages and user flows (public vs authenticated)
   - Data models and where data is stored
-  - Third-party services being used (Stripe, Supabase, etc.)
+  - Third-party services being used (Stripe, etc.)
   - What "done" looks like for this task
 2. Show the file
 3. Wait for approval
@@ -72,8 +72,8 @@ For every response, include:
 - **Errors** — if something went wrong, explain it simply and say exactly how to fix it
 
 
-When a task involves external tools or technical elements that a non-coder wouldn’t know (Supabase, Vercel, Stripe, localhost:3000, etc.):
-- Walk through exactly where to find what they need (e.g. "go to your Supabase dashboard → Settings → API")
+When a task involves external tools or technical elements that a non-coder wouldn’t know (Vercel, Stripe, localhost:3000, etc.):
+- Walk through exactly where to find what they need (e.g. "look at the local database configuration in lib/db.ts")
 - Describe what each key or setting does in one plain sentence
 - If there's SQL to run, explain what it's doing before they run it
 - If there's a bucket, folder, or config to create manually, explain what it is and why it exists
@@ -88,10 +88,10 @@ When a task involves external tools or technical elements that a non-coder would
 
 - **Language:** TypeScript
 - **Framework:** Next.js@latest (App Router. Website must be built in Next.js - do not build a static HTML site unless explicitly asked.
-- **Backend-as-a-Service:** Supabase (Auth, Postgres, Storage, RLS)
-- **Deployment:** Vercel
+- **Database:** SQLite3 (Local file-based SQL database via `better-sqlite3`)
+- **Deployment:** Vercel / VPS
 - **Styling:** Tailwind CSS
-- **Key libraries:** `@supabase/supabase-js`, `@supabase/ssr`
+- **Key libraries:** `better-sqlite3`
 
 
 ---
@@ -118,8 +118,8 @@ When a task involves external tools or technical elements that a non-coder would
 - `/app/interview/[token]/` → The page candidates land on when they click their invite link
 - `/components/` → Reusable building blocks (buttons, cards, forms) used across pages
 - `/lib/` → Shared helper code used throughout the app
-- `/lib/supabase/` → The code that connects the app to your Supabase database
-- `/supabase/` → The instructions that set up your database tables
+- `/lib/db.ts` → The code that connects the app to your SQLite3 database
+- `/db/` → Schema and migration files for your tables
 - `/public/` → Images and other static files
 - `.env.local` → Your secret keys — never share or commit this to GitHub
 - `project_specs.md` → The blueprint Claude reads before doing anything
@@ -130,7 +130,7 @@ When a task involves external tools or technical elements that a non-coder would
 **Code organisation rules:**
 - Keep API routes thin — call a service or lib function, don't put business logic in the route handler
 - One component per file; co-locate page-specific components with the page
-- Supabase server client (SSR) for server components and API routes; browser client only in client components
+- SQLite3 connection helper for server components and API routes; never expose or query SQLite directly in client components
 - Don't create new top-level folders without asking first
 
 
@@ -169,14 +169,13 @@ If a big structural change is needed, explain why before making it.
 ---
 
 
-# Supabase Rules
+# SQLite3 Rules
 
 
-- Always use RLS — never disable it
-- Server-side Supabase client for all sensitive operations (API routes, server components)
-- Candidate operations go through API routes so RLS doesn't need to expose candidate rows publicly
-- Signed URLs for all video access — never make the storage bucket public
-- Never expose the `service_role` key in client-side code
+- Always execute SQLite database queries in Server Components, API routes, or Server Actions. Never import the database client or execute queries in Client Components.
+- Use parameterized queries (e.g., `db.prepare('SELECT * FROM table WHERE id = ?')`) to prevent SQL Injection. Never concatenate user input directly into SQL queries.
+- Ensure the SQLite connection handles development hot-reloads gracefully using a global instance pattern.
+- Keep the database file (`local.db`) in the root directory and ensure it is added to `.gitignore`.
 
 
 ---
@@ -187,7 +186,7 @@ If a big structural change is needed, explain why before making it.
 
 - Never put API keys or passwords directly in the code
 - Never commit `.env.local` to GitHub
-- Never expose Supabase `service_role` key in frontend code
+- Never commit actual SQLite database files (`*.db`) to GitHub
 - Ask before deleting or renaming any important files
 
 
@@ -208,7 +207,7 @@ When building a new page or API route:
 - Test the happy path (everything works as expected)
 - Test the error path (what happens if something goes wrong)
 - Check that auth is working — logged-in vs logged-out behaviour
-- Confirm Supabase RLS is doing what it should (data is scoped correctly per user)
+- Confirm SQLite queries filter data correctly and securely per user session
 
 
 Never say "done" if:

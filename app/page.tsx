@@ -113,14 +113,14 @@ const FEATURES = [
   },
   {
     tag: "Future",
-    title: "Ready for Supabase",
-    body: "Folders and conventions in place so auth and data slot in without rework.",
+    title: "Ready for SQLite3",
+    body: "Database configuration and helpers in place so database storage slots in without rework.",
   },
 ];
 
 const STEPS = [
   "Start with a clean landing page that loads instantly.",
-  "Add Supabase for auth and a Postgres backend.",
+  "Add SQLite3 for local data persistence.",
   "Layer in dashboards, lead capture, and reporting.",
-  "Ship to Vercel and connect a real domain.",
+  "Ship to Vercel/VPS and connect a real domain.",
 ];
